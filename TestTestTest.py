@@ -72,79 +72,25 @@ def GaussFilter(kernelSize, img):
 
 
 def SobelOperator(img):
-    ##Preallocate the matrices with zeros
-    #I = zeroes(size(A))
-    I = np.zeros(shape=(img.shape))
-    
-    #filter masks
-    F1 = [[-1, 0, 1],
-          [-2, 0, 2],
-          [-1, 0, 1]]
-    
-    F2 = [[-1, -2, -1],
-          [0, 0, 0],
-          [1, 2, 1]]
-    
-    
-    #https://www.unioviedo.es/compnum/labs/new/intro_image.html
-    #convert the image into a double precision numpy array
-    #A = np.asarray(img, dtype= np.float64)
-    
-    #https://scikit-image.org/docs/dev/api/skimage.html#skimage.img_as_float64
-    A= skimage.img_as_float64(img, force_copy=False)
-    
-    ### do "transformations" and convert back after-> see below ##
-    #e.g. use name A1, will be used later, otherwise remember to change below
-    
-    
-#    for i in range (1,imgWidth-2):
-#        for j in range (1, imgHeight-2):
-#            print(A[i]+2)
-#            #Gradient operations
-#            #Gx = sum(sum(F1*A(i:i+2, j:j+2)))
-#            #Gx = sum(sum(F1*A(([i],[i+2]),([j],[j+2]))))
-#            Gx = sum(sum(F1*A[[i]+2,[j]+2]))
-#            
-#            #GY = sum(sum(F2*A(i:i+2,j:j+2)))
-#            #Gy = sum(sum(F2*A(([i],[i+2]),([j],[j+2]))))
-#            Gy = sum(sum(F2*A[[i]+2,[j]+2]))
-#            
-#            #magnitude of vector
-#            #I(i+1,j+1) = sqrt(Gx^2+Gy^2)
-#            I[i+1, j+1] = math.sqrt(pow(Gx,2)+pow(Gy,2))
-    
-    for i in range(1,dims[0]-1):
-        for j in range(1,dims[1]-1):
-            Gx = (img[i - 1][j - 1] + 2*img[i][j - 1] + img[i + 1][j - 1]) - (img[i - 1][j + 1] + 2*img[i][j + 1] + img[i + 1][j + 1])
-            Gy = (img[i - 1][j - 1] + 2*img[i - 1][j] + img[i - 1][j + 1]) - (img[i + 1][j - 1] + 2*img[i + 1][j] + img[i + 1][j + 1])
-            I = min(255, np.sqrt(Gx**2 + Gy**2))   
-    
+    container = np.copy(img)
+    size = container.shape
+    for i in range(1, size[0] - 1):
+        for j in range(1, size[1] - 1):
+            gx = (img[i - 1][j - 1][0] + 2*img[i][j - 1][0] + img[i + 1][j - 1][0]) - (img[i - 1][j + 1][0] + 2*img[i][j + 1][0] + img[i + 1][j + 1][0])
+            gy = (img[i - 1][j - 1][0] + 2*img[i - 1][j][0] + img[i - 1][j + 1][0]) - (img[i + 1][j - 1][0] + 2*img[i + 1][j][0] + img[i + 1][j + 1][0])
+            container[i][j] = min(255, np.sqrt(gx**2 + gy**2))
             
-            
-    
-    
-    
-    #As this last matrix range of values differs from  [0,255]  we must fit 
-    #again the values into this range with a linear transformation
-    #A2 = (A1-np.min(A1))/(np.max(A1)-np.min(A1))*255
-    A2 = (I-np.min(I))/(np.max(I)-np.min(I))*255
-    
-    #convert the type of values in the matrix to unsigned integers of 8 bits
-    #A3 = A2.astype(np.uint8)
-    A3 = A2.astype(np.uint8)
-    
-    #Ready to be converted back to an image and saved
-    #Im = Image.fromarray(A3)
-    #Im.save("edges.jpg")
-    
-    return A3
+    return container
+    pass
             
 
 #Displaying grayscale image    
 imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
 cv2.imshow("Greyscale", imgGrey)
+#Show image with gaussian-filter applied
 imgGauss = GaussFilter(3,imgGrey)
 cv2.imshow("GaussianFilter", imgGauss)
 
-#imgSobel = SobelOperator(imgGauss)
-#cv2.imshow("Edges", imgSobel)
+#Show image with sobelOperator applied
+imgSobel = SobelOperator(imgGauss)
+cv2.imshow("Edges", imgSobel)
