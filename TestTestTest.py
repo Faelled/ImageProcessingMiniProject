@@ -15,11 +15,9 @@ import skimage
 #greyscale
 #1) Take the grayscale of the original image
 #reading image 
-#img = cv2.imread('aau-city-1.jpg',1)
-img = cv2.imread('aau-city-3.png',1)
-img2 = cv2.imread('aau-city-2.jpg',1)
+img = cv2.imread('aau-city-2.jpg',1)
 #show original-image, first parameter= name of new window
-cv2.imshow('Original img',img)
+
 
 dims = img.shape #Dimensions of image?
 imgWidth = dims[0] # amount of columns
@@ -136,23 +134,11 @@ def SobelOperator(img):
     A3 = A2.astype(np.uint8)
     
     #Ready to be converted back to an image and saved
-    Im = Image.fromarray(A3)
+    #Im = Image.fromarray(A3)
     #Im.save("edges.jpg")
     
     return A3
             
-
-
-
-
-
-
-
-
-
-
-
-
 
 #Displaying grayscale image    
 imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
@@ -160,5 +146,5 @@ cv2.imshow("Greyscale", imgGrey)
 imgGauss = GaussFilter(3,imgGrey)
 cv2.imshow("GaussianFilter", imgGauss)
 
-imgSobel = SobelOperator(imgGauss)
-cv2.imshow("Edges", imgSobel)
+#imgSobel = SobelOperator(imgGauss)
+#cv2.imshow("Edges", imgSobel)
