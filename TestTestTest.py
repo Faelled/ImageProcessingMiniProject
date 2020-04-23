@@ -9,12 +9,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib 
 import math
+import skimage
 
 
 #greyscale
 #1) Take the grayscale of the original image
 #reading image 
-img = cv2.imread('aau-city-1.jpg',1)
+#img = cv2.imread('aau-city-1.jpg',1)
+img = cv2.imread('aau-city-3.png',1)
 img2 = cv2.imread('aau-city-2.jpg',1)
 #show original-image, first parameter= name of new window
 cv2.imshow('Original img',img)
@@ -88,24 +90,36 @@ def SobelOperator(img):
     
     #https://www.unioviedo.es/compnum/labs/new/intro_image.html
     #convert the image into a double precision numpy array
-    A = np.asarray(img, dtype= np.float64)
+    #A = np.asarray(img, dtype= np.float64)
+    
+    #https://scikit-image.org/docs/dev/api/skimage.html#skimage.img_as_float64
+    A= skimage.img_as_float64(img, force_copy=False)
+    
     ### do "transformations" and convert back after-> see below ##
     #e.g. use name A1, will be used later, otherwise remember to change below
     
     
-    for i in range (1,imgWidth-2):
-        for j in range (1, imgHeight-2):
-            
-            #Gradient operations
-            #Gx = sum(sum(F1*A(i:i+2, j:j+2)))
-            Gx = sum(sum(F1*A(([i],[i+2]),([j],[j+2]))))
-            #GY = sum(sum(F2*A(i:i+2,j:j+2)))
-            Gy = sum(sum(F2*A(([i],[i+2]),([j],[j+2]))))
-            
-            #magnitude of vector
-            #I(i+1,j+1) = sqrt(Gx^2+Gy^2)
-            I[i+1, j+1] = math.sqrt(pow(Gx,2)+pow(Gy,2))
+#    for i in range (1,imgWidth-2):
+#        for j in range (1, imgHeight-2):
+#            print(A[i]+2)
+#            #Gradient operations
+#            #Gx = sum(sum(F1*A(i:i+2, j:j+2)))
+#            #Gx = sum(sum(F1*A(([i],[i+2]),([j],[j+2]))))
+#            Gx = sum(sum(F1*A[[i]+2,[j]+2]))
+#            
+#            #GY = sum(sum(F2*A(i:i+2,j:j+2)))
+#            #Gy = sum(sum(F2*A(([i],[i+2]),([j],[j+2]))))
+#            Gy = sum(sum(F2*A[[i]+2,[j]+2]))
+#            
+#            #magnitude of vector
+#            #I(i+1,j+1) = sqrt(Gx^2+Gy^2)
+#            I[i+1, j+1] = math.sqrt(pow(Gx,2)+pow(Gy,2))
     
+    for i in range(1,dims[0]-1):
+        for j in range(1,dims[1]-1):
+            Gx = (img[i - 1][j - 1] + 2*img[i][j - 1] + img[i + 1][j - 1]) - (img[i - 1][j + 1] + 2*img[i][j + 1] + img[i + 1][j + 1])
+            Gy = (img[i - 1][j - 1] + 2*img[i - 1][j] + img[i - 1][j + 1]) - (img[i + 1][j - 1] + 2*img[i + 1][j] + img[i + 1][j + 1])
+            I = min(255, np.sqrt(Gx**2 + Gy**2))   
     
             
             
@@ -125,7 +139,7 @@ def SobelOperator(img):
     Im = Image.fromarray(A3)
     #Im.save("edges.jpg")
     
-    return Im
+    return A3
             
 
 
@@ -143,7 +157,7 @@ def SobelOperator(img):
 #Displaying grayscale image    
 imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
 cv2.imshow("Greyscale", imgGrey)
-imgGauss = GaussFilter(9,imgGrey)
+imgGauss = GaussFilter(3,imgGrey)
 cv2.imshow("GaussianFilter", imgGauss)
 
 imgSobel = SobelOperator(imgGauss)
