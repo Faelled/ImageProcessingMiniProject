@@ -12,7 +12,7 @@ from os import system
 from skimage.feature import corner_harris, corner_peaks
 
 
-img = cv2.imread('aau-city-3.png',1)
+img = cv2.imread('aau-city-2.jpg',1)
 
 
 #Variables
@@ -98,6 +98,20 @@ def SobelGradientX(img, i, j):
 def SobelGradientY(img, i, j):
     return (img[i - 1][j - 1][0] + 2*img[i - 1][j][0] + img[i - 1][j + 1][0]) - (img[i + 1][j - 1][0] + 2*img[i + 1][j][0] + img[i + 1][j + 1][0])
 
+def makeWindow(x,y, img):
+    row = 0
+    col = 0
+    
+    for i in range (x-step, x+step):
+        col = 0
+        for j in range (y-step, y+step):
+            window[row][col] = img[i][j][0]
+            col +=1
+        row +=1
+                      
+def DisplaceWindow(x,y, img):
+    for i in range ()
+
 def CalculateWindowR(window):
     k = 0.04
     
@@ -118,14 +132,17 @@ def CalculateWindowR(window):
 
 
 def Harris(img):    #should not be used? is commented out in: https://github.com/muthuspark/ml_research/blob/master/Process%20of%20Harris%20Corner%20Detection%20Algorithm.ipynb
-    height, width = img.shape
+    dims = img.shape #Dimensions of image?
+    x = dims[0] # amount of columns
+    y = dims[1] # amount of rows
+    #height, width = img.shape
     CalculateWindowR.harris_response = []
     window_size = 6
     offset = int(window_size/2)
     k = 0.04
     
-    for y in range(offset, height-offset):
-        for x in range(offset, width-offset):
+    for y in range(offset, y-offset):
+        for x in range(offset, x-offset):
             Sxx = np.sum(CalculateWindowR.Ixx[y-offset: y+1+offset, x-offset: x+1+offset])
             Syy = np.sum(CalculateWindowR.Iyy[y-offset: y+1+offset, x-offset: x+1+offset])
             Sxy = np.sum(CalculateWindowR.Ixy[y-offset: y+1+offset, x-offset: x+1+offset])
@@ -167,14 +184,6 @@ def NonMaximumSuppression(img): #should not be a function?
     return img_copy_for_corners, img_copy_for_edges
 
 
-
-
-
-
-
-
-
-
 def FoundCorner(window):
     rValue = CalculateWindowR(window)
     
@@ -197,32 +206,26 @@ def searchForCorner(x, y):
 
 
 
-
-
-
-
-    
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
 #Displaying original image
 cv2.imshow("Original image", img)
 
 #Displaying grayscale image 
-imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
-cv2.imshow("Greyscale", imgGrey)
+#imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
+#cv2.imshow("Greyscale", imgGrey)
 
-imgGauss = GaussFilter(imgGrey)
-cv2.imshow('Gaussian', imgGauss)
+#imgGauss = GaussFilter(imgGrey)
+#cv2.imshow('Gaussian', imgGauss)
 
 #Show image with SobelOperator applied
-imgSobel = SobelOperator(imgGrey)
-cv2.imshow('sobel',imgSobel)
+#imgSobel = SobelOperator(imgGrey)
+#cv2.imshow('sobel',imgSobel)
+
+#CalculateWindowR(imgSobel)
+makeWindow(150,200, img)
+cv2.imshow('window',window)
+
+#Harris(imgSobel)
+#cv2.imshow('Harris',imgSobel)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
