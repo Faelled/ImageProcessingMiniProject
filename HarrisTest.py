@@ -12,19 +12,17 @@ from os import system
 from skimage.feature import corner_harris, corner_peaks
 
 
-img = cv2.imread('aau-city-2.jpg',1)
+imgInput = cv2.imread('aau-city-2.jpg',1)
 
 
 #Variables
-dims = img.shape #Dimensions of image?
+dims = imgInput.shape #Dimensions of image?
 imgWidth = dims[0] # amount of columns
 imgHeight = dims[1] # amount of rows
 imgChannels = dims[2] # amount of channels; 3 = RGB, 1 = greyscale
 
-windowSize = 50 # size of window in pixels that we move around
+windowSize = 3 # size of window in pixels that we move around
 step = windowSize // 2 # half (rounded down, just in case) 
-window = np.zeros(shape=[windowSize, windowSize, 1], dtype=np.uint8) # make blank image to fill out as window
-
 
 #Converting to grayscale - defining grayscale func.
 def ConvertToGreyscale(_img, x, y, z):
@@ -99,6 +97,7 @@ def SobelGradientY(img, i, j):
     return (img[i - 1][j - 1][0] + 2*img[i - 1][j][0] + img[i - 1][j + 1][0]) - (img[i + 1][j - 1][0] + 2*img[i + 1][j][0] + img[i + 1][j + 1][0])
 
 def makeWindow(x,y, img):
+    window = np.zeros(shape=[windowSize, windowSize, 1], dtype=np.uint8) # make blank image to fill out as window
     row = 0
     col = 0
     
@@ -108,15 +107,16 @@ def makeWindow(x,y, img):
             window[row][col] = img[i][j][0]
             col +=1
         row +=1
+    return window
                       
-def DisplaceWindow(x,y, img):
-    for i in range ()
+#def DisplaceWindow(x,y, img):
+#    for i in range ()
 
 def CalculateWindowR(window):
     k = 0.04
     
-    Ix = SobelGradientX(window)
-    Iy = SobelGradientY(window)
+    Ix = SobelGradientX(window, 1, 1)
+    Iy = SobelGradientY(window, 1, 1)
     
     Ixx = Ix * Ix
     Iyy = Iy * Iy
@@ -131,63 +131,54 @@ def CalculateWindowR(window):
     #return det - k * (trace * trace) #harris_response
 
 
-def Harris(img):    #should not be used? is commented out in: https://github.com/muthuspark/ml_research/blob/master/Process%20of%20Harris%20Corner%20Detection%20Algorithm.ipynb
-    dims = img.shape #Dimensions of image?
-    x = dims[0] # amount of columns
-    y = dims[1] # amount of rows
-    #height, width = img.shape
-    CalculateWindowR.harris_response = []
-    window_size = 6
-    offset = int(window_size/2)
-    k = 0.04
+def Harris(img):    #should not be used? is commented out in: https://github.com/muthuspark/ml_research/blob/mastera/Process%20of%20Harris%20Corner%20Detection%20Algorithm.ipynb
+
+    for x in range (50, imgWidth - 50):
+            for y in range (50, imgHeight - 50):
+                window = makeWindow(x, y, img)
+                SearchForCorner(x, y, window)
     
-    for y in range(offset, y-offset):
-        for x in range(offset, x-offset):
-            Sxx = np.sum(CalculateWindowR.Ixx[y-offset: y+1+offset, x-offset: x+1+offset])
-            Syy = np.sum(CalculateWindowR.Iyy[y-offset: y+1+offset, x-offset: x+1+offset])
-            Sxy = np.sum(CalculateWindowR.Ixy[y-offset: y+1+offset, x-offset: x+1+offset])
-            
-            #Find determinant and trace, use to get corner response
-            det = (Sxx * Syy) - (Sxy*Sxy)
-            trace = Sxx + Syy
-            r = det - k* (trace * trace)
-            
-            CalculateWindowR.harris_response.append(r)
-    return r #???
+    # Gå gennem billed hver halve billedlængde
+    # Ved hvert step, lav et vindue, og displace 4 vinduer i hvert diagonal retning; stop når R-værdien for et vindue er høj nok (??) eller når man har lavet 4 vinduer
+    # Hvis R-værdien er høj nok, marker som hjørne, ellers fortsæt og lav et billed af næste step
+
+
+    return img #???
 
 #Non-maximum suppression
-def NonMaximumSuppression(img): #should not be a function?
-    img_copy_for_corners = np.copy(img)
-    img_copy_for_edges = np.copy(img)
-    
-    for rowIndex, response in enumerate(CalculateWindowR.harris_response):
-        for colIndex, r in enumerate(response):
-            if r > 0:
-                #this is a corner
-                img_copy_for_corners[rowIndex, colIndex] = [255, 0, 0]
-            elif r < 0:
-                #this is an edge
-                img_copy_for_edges[rowIndex, colIndex] = [0, 255, 0]
-    
-    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10,10))
-    ax[0].set_title("corners found")
-    ax[0].imshow(img_copy_for_corners)
-    ax[1].set_title("edges found")
-    ax[1].imshow(img_copy_for_edges)
-    plt.show()
-    
-    corners = corner_peaks(CalculateWindowR.harris_response)
-    fig, ax = plt.subplots()
-    ax.imshow(img, interpolation = 'nearest', cmap=plt.cm.gray)
-    ax.plot(corners[:, 1], corners[:, 0], '.r', markersize=3)
-    
-    return img_copy_for_corners, img_copy_for_edges
+#def NonMaximumSuppression(img): #should not be a function?
+#    img_copy_for_corners = np.copy(img)
+#    img_copy_for_edges = np.copy(img)
+#    
+#    for rowIndex, response in enumerate(CalculateWindowR.harris_response):
+#        for colIndex, r in enumerate(response):
+#            if r > 0:
+#                #this is a corner
+#                img_copy_for_corners[rowIndex, colIndex] = [255, 0, 0]
+#            elif r < 0:
+#                #this is an edge
+#                img_copy_for_edges[rowIndex, colIndex] = [0, 255, 0]
+#    
+#    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(10,10))
+#    ax[0].set_title("corners found")
+#    ax[0].imshow(img_copy_for_corners)
+#    ax[1].set_title("edges found")
+#    ax[1].imshow(img_copy_for_edges)
+#    plt.show()
+#    
+#    corners = corner_peaks(CalculateWindowR.harris_response)
+#    fig, ax = plt.subplots()
+#    ax.imshow(img, interpolation = 'nearest', cmap=plt.cm.gray)
+#    ax.plot(corners[:, 1], corners[:, 0], '.r', markersize=3)
+#    
+#    return img_copy_for_corners, img_copy_for_edges
 
 
 def FoundCorner(window):
     rValue = CalculateWindowR(window)
+    print(rValue)
     
-    if(rValue > threshold):
+    if(rValue > 0):
         return True
     
     return False
@@ -200,32 +191,34 @@ def MarkCorner(_img, x, y):
     cv2.line(_img, (x, y-crossSize), (x, y+crossSize), (255, 255, 0), crossThickness) # vertical
     cv2.line(_img, (x, y), (x, y), (0, 0, 255), crossThickness+2) # mid point
 
-def searchForCorner(x, y):
+def SearchForCorner(x, y, window):
     if(FoundCorner(window)):
-        MarkCorner(x, y)
+        MarkCorner(imgInput, x, y)
 
 
 
 #Displaying original image
-cv2.imshow("Original image", img)
+
 
 #Displaying grayscale image 
-#imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
+imgGrey = ConvertToGreyscale(imgInput, imgWidth, imgHeight, imgChannels)
 #cv2.imshow("Greyscale", imgGrey)
 
-#imgGauss = GaussFilter(imgGrey)
+imgGauss = GaussFilter(imgGrey)
 #cv2.imshow('Gaussian', imgGauss)
 
 #Show image with SobelOperator applied
-#imgSobel = SobelOperator(imgGrey)
+imgSobel = SobelOperator(imgGrey)
 #cv2.imshow('sobel',imgSobel)
 
-#CalculateWindowR(imgSobel)
-makeWindow(150,200, img)
-cv2.imshow('window',window)
+##CalculateWindowR(imgSobel)
+#makeWindow(150,200, img)
+#cv2.imshow('window',window)
 
-#Harris(imgSobel)
-#cv2.imshow('Harris',imgSobel)
+imgHarris = Harris(imgSobel)
+cv2.imshow('Harris',imgHarris)
+
+cv2.imshow("Original image", imgInput)
 
 cv2.waitKey(0)
 cv2.destroyAllWindows()
