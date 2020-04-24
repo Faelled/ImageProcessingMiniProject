@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 import matplotlib 
 import math
 import skimage
-
+from Gaussianfilter import GaussFilter
 
 #greyscale
 #1) Take the grayscale of the original image
@@ -43,31 +43,6 @@ def ConvertToGreyscale(_img, x, y, z):
     return _grey
 
 
-def GaussFilter(kernelSize, img):
-    dims = img.shape
-    x = dims[0]
-    y = dims[1]
-    print(x)
-    print(y)
-    offset = kernelSize//2
-    customFilter = np.zeros(shape=(kernelSize,kernelSize))
-       
-    for i in range (0, kernelSize):
-        for j in range (0, kernelSize):
-            customFilter[i][j] = 1
-       
-       
-    for j in range (offset, y-offset):
-        for i in range (offset, x-offset):
-            newValue = 0.0
-            
-            for l in range(0, kernelSize):
-                for k in range(0, kernelSize):
-                    newValue += img[i+k-offset][j+l -offset]*customFilter[l][k]
-  
-            newValue=newValue//(kernelSize*kernelSize)
-            img[i][j] = newValue
-    return img;
 
 
 
@@ -84,13 +59,25 @@ def SobelOperator(img):
     pass
             
 
+#def HarrisCorner(img):
+#    
+#    for i in range(y):
+#        print("Looking for them fat corners brah")
+#        for j in range(X):
+#            
+#    
+#    return harrisImg
+    
+
 #Displaying grayscale image    
 imgGrey = ConvertToGreyscale(img, imgWidth, imgHeight, imgChannels)
 cv2.imshow("Greyscale", imgGrey)
 #Show image with gaussian-filter applied
-imgGauss = GaussFilter(3,imgGrey)
+imgGauss = GaussFilter(imgGrey)
 cv2.imshow("GaussianFilter", imgGauss)
 
 #Show image with sobelOperator applied
 imgSobel = SobelOperator(imgGauss)
 cv2.imshow("Edges", imgSobel)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
