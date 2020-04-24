@@ -3,7 +3,6 @@ import numpy as np
 import cv2
 
 imgInput = cv2.imread('aau-city-2.jpg',1)
-#imgInput = cv2.imread('FuckChris.png',1) #øltyv
 
 #Variables
 dims = imgInput.shape #Dimensions of image?
